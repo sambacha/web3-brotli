@@ -1,5 +1,3 @@
-
-
 /**
  * Contains error classes.
  */

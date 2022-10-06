@@ -41,10 +41,7 @@ function cacheKeyBrotli(...parts: string[]): string {
  * @returns - SHA-1 digest of the object as a hex string.
  */
 export async function hashObject(obj: unknown): Promise<string> {
-  const hashBuffer = await crypto.subtle.digest(
-    'SHA-1',
-    textEncoder.encode(JSON.stringify(obj))
-  );
+  const hashBuffer = await crypto.subtle.digest('SHA-1', textEncoder.encode(JSON.stringify(obj)));
   return Array.from(new Uint8Array(hashBuffer))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
@@ -62,7 +59,7 @@ export async function hashObject(obj: unknown): Promise<string> {
 export async function getCacheFor(
   url: string,
   key: string,
-  cf: IncomingCloudflarePropertiesExtended
+  cf: IncomingCloudflarePropertiesExtended,
 ): Promise<Response | undefined> {
   const cache = await caches.open(INJECTORS_CACHE_NAME);
   return supportsBrotli(cf)
@@ -77,11 +74,7 @@ export async function getCacheFor(
  * @param url - base file URL that has dynamic content injected into it.
  * @param key - unique identifiers for this specific injection.
  */
-async function saveCache(
-  response: Response,
-  url: string,
-  key: string
-): Promise<void> {
+async function saveCache(response: Response, url: string, key: string): Promise<void> {
   console.log('Caching', url, 'with cache key', key);
   // Replace whatever cache-control header that we respond with, with a 1 year
   // cache-control. Responses to user requests should replace this header again
@@ -95,31 +88,21 @@ async function saveCache(
   const responseClone = response.clone();
 
   const cache = await caches.open(INJECTORS_CACHE_NAME);
-  const plainResponsePromise = cache
-    .put(cacheKey(url, key), response)
-    .then(() => {
-      console.log('> Plain response cached');
-    });
+  const plainResponsePromise = cache.put(cacheKey(url, key), response).then(() => {
+    console.log('> Plain response cached');
+  });
 
   // Create an equivalent Response object that is already Brotli-compressed.
-  const compressed = await brotli.compress(
-    new Uint8Array(await responseClone.arrayBuffer()),
-    {
-      quality: 11,
-    }
-  );
+  const compressed = await brotli.compress(new Uint8Array(await responseClone.arrayBuffer()), {
+    quality: 11,
+  });
   const brotliResponse = new Response(compressed, {
-    headers: [
-      ...response.headers,
-      [HeaderKeys.CONTENT_ENCODING, ContentEncoding.BROTLI],
-    ],
+    headers: [...response.headers, [HeaderKeys.CONTENT_ENCODING, ContentEncoding.BROTLI]],
     encodeBody: 'manual',
   });
-  const brotliResponsePromise = cache
-    .put(cacheKeyBrotli(url, key), brotliResponse)
-    .then(() => {
-      console.log('> Brotli response cached');
-    });
+  const brotliResponsePromise = cache.put(cacheKeyBrotli(url, key), brotliResponse).then(() => {
+    console.log('> Brotli response cached');
+  });
 
   // Cache both the plain and the Brotli-compressed responses.
   await Promise.all([plainResponsePromise, brotliResponsePromise]);
@@ -138,7 +121,7 @@ export function enqueueCacheAndClone(
   extend: FetchEvent['waitUntil'],
   response: Response,
   url: string,
-  key: string
+  key: string,
 ): Response {
   if (!response.body) {
     // To pass type checking below...

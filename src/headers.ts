@@ -2,13 +2,12 @@
  * HTTP headers related functions and consts.
  */
 
-import type {IncomingCloudflareProperties} from 'worktop/request';
+import type { IncomingCloudflareProperties } from 'worktop/request';
 
 // `clientAcceptEncoding` is unofficial, but guaranteed by Cloudflare.
-export type IncomingCloudflarePropertiesExtended =
-  IncomingCloudflareProperties & {
-    clientAcceptEncoding?: string;
-  };
+export type IncomingCloudflarePropertiesExtended = IncomingCloudflareProperties & {
+  clientAcceptEncoding?: string;
+};
 
 const SHARED_HEADERS: ReadonlyMap<string, string> = new Map([
   ['access-control-allow-origin', '*'],
@@ -95,15 +94,11 @@ function normalizeContentType(inputContentType: string | null): string {
 export function withHeaders(
   inputResponse: Response,
   cacheControl: string,
-  extraHeaders?: ReadonlyMap<HeaderKeys, string>
+  extraHeaders?: ReadonlyMap<HeaderKeys, string>,
 ): Response {
   // Note that these could be overridden via extraHeaders.
-  const contentEncoding = inputResponse.headers.get(
-    HeaderKeys.CONTENT_ENCODING
-  );
-  const contentType = normalizeContentType(
-    inputResponse.headers.get(HeaderKeys.CONTENT_TYPE)
-  );
+  const contentEncoding = inputResponse.headers.get(HeaderKeys.CONTENT_ENCODING);
+  const contentType = normalizeContentType(inputResponse.headers.get(HeaderKeys.CONTENT_TYPE));
 
   // Create a map for headers that get chosen directly in this function.
   const initialHeaders = new Map<HeaderKeys, string>([
@@ -133,8 +128,6 @@ export function withHeaders(
 /**
  * Whether the client supports Brotli compression.
  */
-export function supportsBrotli(
-  cf?: IncomingCloudflarePropertiesExtended
-): boolean {
+export function supportsBrotli(cf?: IncomingCloudflarePropertiesExtended): boolean {
   return /\bbr\b/.test(cf?.clientAcceptEncoding ?? '');
 }

@@ -2,15 +2,12 @@
  * Tests for injectors-cache.ts.
  */
 
-import {disableFetchMocks, enableFetchMocks} from 'jest-fetch-mock';
-import {mocked} from 'ts-jest/utils';
+import { disableFetchMocks, enableFetchMocks } from 'jest-fetch-mock';
+import { mocked } from 'ts-jest/utils';
 
 import * as brotli from '../src/brotli-wasm-wrapper';
-import {
-  CacheControl,
-  IncomingCloudflarePropertiesExtended,
-} from '../src/headers';
-import {enqueueCacheAndClone, getCacheFor} from '../src/injectors-cache';
+import { CacheControl, IncomingCloudflarePropertiesExtended } from '../src/headers';
+import { enqueueCacheAndClone, getCacheFor } from '../src/injectors-cache';
 
 jest.mock('../src/brotli-wasm-wrapper');
 const brotliCompressMock = mocked(brotli.compress);
@@ -53,12 +50,12 @@ describe('injectors-cache', () => {
       const response = await getCacheFor(
         'https://storage.googleapis.com/org-cdn/org-cdn/rtv/012105150310000/v0/amp-geo-0.1.js',
         'NL;',
-        cfSupportsBrotli
+        cfSupportsBrotli,
       );
       expect(response).toBeDefined();
 
       expect(cacheMatchMock).toHaveBeenCalledWith(
-        'https://storage.googleapis.com/org-cdn/org-cdn/rtv/012105150310000/v0/amp-geo-0.1.js;NL;;br'
+        'https://storage.googleapis.com/org-cdn/org-cdn/rtv/012105150310000/v0/amp-geo-0.1.js;NL;;br',
       );
     });
 
@@ -68,12 +65,12 @@ describe('injectors-cache', () => {
       const response = await getCacheFor(
         'https://storage.googleapis.com/org-cdn/org-cdn/rtv/012105150310000/v0/amp-geo-0.1.js',
         'US;NY',
-        cfDoesNotSupportBrotli
+        cfDoesNotSupportBrotli,
       );
       expect(response).toBeDefined();
 
       expect(cacheMatchMock).toHaveBeenCalledWith(
-        'https://storage.googleapis.com/org-cdn/org-cdn/rtv/012105150310000/v0/amp-geo-0.1.js;US;NY'
+        'https://storage.googleapis.com/org-cdn/org-cdn/rtv/012105150310000/v0/amp-geo-0.1.js;US;NY',
       );
     });
 
@@ -83,12 +80,12 @@ describe('injectors-cache', () => {
       const response = await getCacheFor(
         'https://storage.googleapis.com/org-cdn/org-cdn/rtv/012105150310000/v0.js',
         'edaf9e1f7bd5aa20f61c78be7017134eafb88de3',
-        cfSupportsBrotli
+        cfSupportsBrotli,
       );
       expect(response).toBeUndefined();
 
       expect(cacheMatchMock).toHaveBeenCalledWith(
-        'https://storage.googleapis.com/org-cdn/org-cdn/rtv/012105150310000/v0.js;edaf9e1f7bd5aa20f61c78be7017134eafb88de3;br'
+        'https://storage.googleapis.com/org-cdn/org-cdn/rtv/012105150310000/v0.js;edaf9e1f7bd5aa20f61c78be7017134eafb88de3;br',
       );
     });
   });
@@ -109,7 +106,7 @@ describe('injectors-cache', () => {
         extendMock,
         inputResponse,
         'https://storage.googleapis.com/org-cdn/org-cdn/rtv/012105150310000/v0/amp-geo-0.1.js',
-        'US;NY'
+        'US;NY',
       );
 
       expect(response).toBe(inputResponse);
@@ -119,16 +116,16 @@ describe('injectors-cache', () => {
       expect(cachePutMock).toHaveBeenNthCalledWith(
         1,
         'https://storage.googleapis.com/org-cdn/org-cdn/rtv/012105150310000/v0/amp-geo-0.1.js;US;NY',
-        expect.any(Response)
+        expect.any(Response),
       );
       expect(cachePutMock).toHaveBeenNthCalledWith(
         2,
         'https://storage.googleapis.com/org-cdn/org-cdn/rtv/012105150310000/v0/amp-geo-0.1.js;US;NY;br',
-        expect.any(Response)
+        expect.any(Response),
       );
       expect(brotliCompressMock).toHaveBeenCalledWith(
         Uint8Array.from(Buffer.from('javascript;', 'utf-8')),
-        {quality: 11}
+        { quality: 11 },
       );
 
       const [putResponse1, putResponse2] = [
@@ -140,7 +137,7 @@ describe('injectors-cache', () => {
         new Headers({
           'cache-control': CacheControl.STATIC_RTV_FILE,
           'content-type': 'text/javascript; charset=utf-8',
-        })
+        }),
       );
       expect(putResponse2.body).toEqual(Buffer.from([0x00, 0x01, 0x02]));
     });
@@ -151,7 +148,7 @@ describe('injectors-cache', () => {
           extendMock,
           new Response(null),
           'https://storage.googleapis.com/org-cdn/org-cdn/rtv/012105150310000/v0/amp-geo-0.1.js',
-          'US;NY'
+          'US;NY',
         );
       }).toThrow('Response has no body');
     });

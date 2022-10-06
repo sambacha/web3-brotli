@@ -1,5 +1,5 @@
 import brotliImportPromise from 'brotli-wasm';
-import type {BrotliModule, Options} from 'brotli-wasm';
+import type { BrotliModule, Options } from 'brotli-wasm';
 
 // This Module object is injected as a global by the Cloudflare Worker runner.
 declare const BROTLI_WASM: WebAssembly.Module;
@@ -30,10 +30,7 @@ async function init_(): Promise<BrotliModule> {
 /**
  * Async wrapper around brotli-wasm's `compress` function.
  */
-export async function compress(
-  buf: Uint8Array,
-  options?: Options
-): Promise<Uint8Array> {
+export async function compress(buf: Uint8Array, options?: Options): Promise<Uint8Array> {
   const brotli = await init_();
   return brotli.compress(buf, options);
 }
